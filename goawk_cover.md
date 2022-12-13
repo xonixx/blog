@@ -31,6 +31,21 @@ So the Makesure started more like an experiment to check how far it can go. It a
 > [I wrote a compiler in awk!](https://news.ycombinator.com/item?id=13452043)
 >
 > To bytecode; I wanted to use the awk-based compiler as the initial bootstrap stage for a self-hosted compiler. Disturbingly, it worked fine. Disappointingly, it was actually faster than the self-hosted version. But it's so not the right language to write compilers in. Not having actual datastructures was a problem. But it was a surprisingly clean 1.5kloc or so. awk's still my go-to language for tiny, one-shot programming and text processing tasks.
+                   
+The other idea behind choosing AWK for the Makesure is the ease of parsing 
+```
+@goal built
+@depends_on tested
+    gcc code.c 
+```
+If you know a bit of AWK, you understand that this syntax is fairly easy to parse with it. AWK already does words splitting for you, so all you need is
+```awk
+if      ($1 == "@goal")       handleGoal()
+else if ($1 == "@depends_on") handleDependency()
+else handleCodeLine()
+```
+
+Essentially, using the limited tool for the job (AWK) provokes you to comply with [Worse is better](https://en.wikipedia.org/wiki/Worse_is_better) principle, that I'm big proponent of. You don't invent fancy syntax, but rather rely on one that actually can be parsed straight forward. 
 
 - https://github.com/xonixx/makesure/issues/103
  
@@ -43,6 +58,7 @@ Practicing Go, AWK
 
 ### How code coverage for AWK differs from mainstream languages
 
+ - tush
  - need for `-coverappend`
 
 ### How I thought to approach the issue
