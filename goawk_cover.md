@@ -17,7 +17,7 @@ But why may we want it for [AWK](https://en.wikipedia.org/wiki/AWK)?
 
 #### Makesure
 
-This is a task/command runner that I'm developing. It's sort of similar to the well-known `make` but without most of its idiosyncrasies (and with a couple of unique features!).
+[Makesure](https://github.com/xonixx/makesure) is a task/command runner that I'm developing. It's sort of similar to the well-known `make` but without most of its idiosyncrasies (and with a couple of unique features!).
 
 It may sound surprising, but I write it in AWK. I won't lie, it started more out of curiosity than out of real need. To me limits encourage creativity. Few people know nowadays that AWK is a full-fledged programming language, though really minimalistic. 
 
@@ -43,14 +43,15 @@ else                          handleCodeLine()
 Essentially, using the limited tool for the job (AWK) provokes you to comply with [Worse is better](https://en.wikipedia.org/wiki/Worse_is_better) principle, that I'm big proponent of. You don't invent fancy syntax, but rather rely on one that actually can be parsed straight forward.
 
 Time passed and source code for the Makesure grew to a [pretty big awk file](https://github.com/xonixx/makesure/blob/main/makesure.awk). The tool had pretty extensive test suite, but I was not sure of how good the coverage is, whether all critical scenarios are tested or not.
-Thus, the need to test coverage [became apparent](https://github.com/xonixx/makesure/issues/103). The research revealed that no AWK implementation had code coverage facility. And so I decided to add one to some AWK implementation. The most suitable for such additon appeared the [GoAWK](https://github.com/benhoyt/goawk).
+Thus, the need to test coverage [became apparent](https://github.com/xonixx/makesure/issues/103). The research revealed that no AWK implementation had code coverage facility. And so I decided to add one to some AWK implementation. The most suitable for such addition appeared the [GoAWK](https://github.com/benhoyt/goawk).
  
-Of cource, some of my other motivators were practicing my Golang and AWK skills. 
+Of course, some of my other motivators were practicing my Golang and AWK skills. 
                 
 ### How coverage works, in simple words
+                                        
+Essentially, to collect code coverage statistics the source code instrumentation is used. That is, each line of a code is annotated with a piece of tracking code. Thus, when the instrumented program runs, the tracking code is triggered each time the code line is hit. At the program end all collected coverage profile data is written to a file. This file is then used to create the human-friendly coverage report like below. 
 
- - code instrumentation
- - ...
+![](goawk_cover.png)
 
 ### How code coverage for AWK differs from mainstream languages
 
@@ -81,5 +82,9 @@ The approach to big changes.
 ### Results
 
 Revealed [uncovered places](https://github.com/xonixx/makesure/issues/111) and eventually found (and fixed) a bug.
+         
+### What's lacking
+
+### Links
 
 Please also take a look at [GoAWK code coverage article by Ben Hoyt](https://benhoyt.com/writings/goawk-coverage/).
