@@ -68,13 +68,23 @@ $ command --that --will --cause error
 ? expected-exit-code
 ```
 
-When running the test, the tool runs all lines starting with `$` and simply compares the actual output with the expected one (`|` for stdout, `@` for stderr) using a usual `diff`. If there is a difference, the test fails and the `diff` output is displayed to the user.
+When running such test, `tush` runs all lines starting with `$` and simply compares the actual output with the expected one (`|` for stdout, `@` for stderr) using a usual `diff`. If there is a difference, the test fails and the `diff` output is displayed to the user.
 
-In essence, such tests are End-to-end tests that are on the top of well-known testing pyramid.
+In essence, such tests are End-to-end tests that are on the top of well-known testing pyramid. This is very good, since this style of testing is equivalent to how real user uses the tool. 
 
 Using this approach I created the comprehensive test suite for the tool with a typical test file [looking like this](https://github.com/xonixx/makesure/blob/main/tests/10_define.tush).
 
- - need for `-coverappend`
+ - ~~need for `-coverappend`~~
+
+The main difference of testing in "usual" languages (like Go, Python, Java) from this approach is that 
+
+The usual approach to testing (like in Go, Python or Java) is you create a set of tests (usually, in multiple source file), then you use some "test runner" to run all them at once. Here is a subtle but principal difference from the approach described above.
+So in case of test runner you run it once for all tests and so it can form the coverage profile file at completion for all tests.
+
+In case with `tush` the program-under-test (`makesure`) and thus the `awk` underneath is called lots of times (with different parameters). So it means we want to have a way to assemble the final coverage profile incrementally. 
+
+This poses additional challenge at implementing coverage for AWK. So we need that separate runs of AWK program be able to append to a single coverage profile file. This implies that not only the internal format of this file needs to be "appendable", but also requires that the reporting facility that consumes the file "understands" this "appendability".
+
 
 ### How I thought to approach the issue
                        
