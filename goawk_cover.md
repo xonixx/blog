@@ -35,15 +35,15 @@ The other idea behind choosing AWK for the Makesure is the ease of parsing
 ```
 If you know a bit of AWK, you understand that this syntax is fairly easy to parse with it. AWK already does words splitting for you, so all you need is
 ```awk
-if      ($1 == "@goal")       handleGoal()
-else if ($1 == "@depends_on") handleDependency()
-else                          handleCodeLine()
+if      ($1 == "@goal")       handleGoal($2)
+else if ($1 == "@depends_on") handleDependency($2)
+else                          handleCodeLine($0)
 ```
 
 Essentially, using the limited tool for the job (AWK) provokes you to comply with [Worse is better](https://en.wikipedia.org/wiki/Worse_is_better) principle, that I'm big proponent of. You don't invent fancy syntax, but rather rely on one that actually can be parsed straight forward.
 
-Time passed and source code for the Makesure grew to a [pretty big awk file](https://github.com/xonixx/makesure/blob/main/makesure.awk). The tool had pretty extensive test suite, but I was not sure of how good the coverage is, whether all critical scenarios are tested or not.
-Thus, the need to test coverage [became apparent](https://github.com/xonixx/makesure/issues/103). The research revealed that no AWK implementation had code coverage facility. And so I decided to add one to some AWK implementation. The most suitable for such addition appeared the [GoAWK](https://github.com/benhoyt/goawk).
+Time passed and source code for the Makesure grew to a [pretty big awk file](https://github.com/xonixx/makesure/blob/main/makesure.awk). The tool had pretty extensive [test suite](https://github.com/xonixx/makesure/tree/main/tests), but I was not sure of how good the coverage is, whether all critical scenarios are tested or not.
+Thus, the need to test coverage [became apparent](https://github.com/xonixx/makesure/issues/103). The research revealed that no AWK implementation had code coverage facility. And so I decided to add one to some AWK implementation. The most suitable for such addition appeared to be the [GoAWK](https://github.com/benhoyt/goawk).
  
 Of course, some of my other motivators were practicing my Golang and AWK skills. 
                 
