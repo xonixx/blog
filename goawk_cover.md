@@ -49,7 +49,7 @@ Of course, some of my other motivators were practicing my Golang and AWK skills.
                 
 ### How coverage works, in simple words
                                         
-Essentially, to collect code coverage statistics the source code instrumentation is used. That is, each line of a code is annotated with a piece of tracking code. Thus, when the instrumented program runs, the tracking code is triggered each time the code line is hit. At the program end all collected coverage profile data is written to a file. This file is then used to create the human-friendly coverage report like below. 
+Essentially, to collect code coverage statistics the source code instrumentation is used. That is, each line of a code is annotated with a piece of tracking code. Thus, when the instrumented program runs, the tracking code is triggered each time the code line is hit. At the program completion all collected coverage profile data is written to a file. This file is then used to create the human-friendly coverage report like below. 
 
 ![](goawk_cover.png)
 
@@ -68,18 +68,18 @@ $ command --that --will --cause error
 ```
 (in my case `command` = `makesure`)
 
-When running such test, `tush` runs all lines starting with `$` and simply compares the actual output with the expected one (`|` for stdout, `@` for stderr) using a usual `diff`. If there is a difference, the test fails and the `diff` output is displayed to the user.
+When running such test, `tush` runs all lines starting with `$` and simply compares the actual output with the expected one using a usual `diff`. If there is a difference, the test fails and the `diff` output is displayed to the user.
 
 In essence, such tests are end-to-end tests that are on the top of well-known [testing pyramid](https://automationpanda.com/2018/08/01/the-testing-pyramid/). This is very good, since this style of testing is equivalent to how _real_ user uses the tool. Thus, much higher chances catching _real_ bugs. 
 
 Using this approach I created the comprehensive test suite for the tool with a typical test file [looking like this](https://github.com/xonixx/makesure/blob/main/tests/10_define.tush).
 
-The usual approach to testing (like in Go, Python or Java) is you create a set of tests (usually, in multiple source file), then you use some "test runner" to run all them at once. Here lays a subtle but principal difference from the approach described above.
+The usual approach to testing (like in Go, Python or Java) is you create a set of tests (usually, in multiple source files), then you use some "test runner" to run all them at once. Here lays a subtle but principal difference from the approach described above.
 So in case of test runner you run it once for all tests and so it can form the coverage profile file at completion for all tests.
 
-In case with `tush` the program-under-test (`makesure`) and thus the `awk` underneath is called lots of times (with different parameters). So it means we want to have a way to assemble the final coverage profile incrementally. 
+In case with `tush` the program-under-test (`makesure`) and thus the `awk` underneath is called lots of times (with different parameters). So it means we want to have a way to assemble the final coverage profile file incrementally. 
 
-This poses additional challenge at implementing coverage for AWK. So we need that separate runs of AWK program be able to append to a single coverage profile file. This implies that not only the internal format of this file needs to be "appendable", but also requires that the reporting facility that consumes the file "understands" this "appendability".
+This poses additional implementation challenge. So we need that separate runs of AWK program be able to append to a single coverage profile file. This implies that not only the internal format of this file needs to be "appendable", but also requires that the reporting facility that consumes the file "understands" this "appendability".
 
 ~~Luckily, the approach we took already had - describe in chosen approach section + `-coverappend`~~
 
