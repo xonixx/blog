@@ -55,7 +55,25 @@ Essentially, to collect code coverage statistics the source code instrumentation
 
 ### How code coverage for AWK differs from mainstream languages
 
- - tush
+For testing `makesure` I'm using the [tush](https://github.com/adolfopa/tush) tool.
+~~Accidentally, it's written in AWK, but it's not the point.~~ 
+The tool provides really nice and simple way to test a CLI-tool as a black box.  
+The tests in `tush` look like
+```
+$ command --that --should --execute correctly
+| expected stdout output
+
+$ command --that --will --cause error
+@ expected stderr output
+? expected-exit-code
+```
+
+When running the test, the tool runs all lines starting with `$` and simply compares the actual output with the expected one (`|` for stdout, `@` for stderr) using a usual `diff`. If there is a difference, the test fails and the `diff` output is displayed to the user.
+
+In essence, such tests are End-to-end tests that are on the top of well-known testing pyramid.
+
+Using this approach I created the comprehensive test suite for the tool with a typical test file [looking like this](https://github.com/xonixx/makesure/blob/main/tests/10_define.tush).
+
  - need for `-coverappend`
 
 ### How I thought to approach the issue
@@ -87,4 +105,5 @@ Revealed [uncovered places](https://github.com/xonixx/makesure/issues/111) and e
 
 ### Links
 
-Please also take a look at [GoAWK code coverage article by Ben Hoyt](https://benhoyt.com/writings/goawk-coverage/).
+- Please also take a look at [GoAWK code coverage article by Ben Hoyt](https://benhoyt.com/writings/goawk-coverage/).
+- https://github.com/benhoyt/goawk/blob/master/docs/cover.md
