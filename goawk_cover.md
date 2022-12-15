@@ -21,7 +21,7 @@ But why may we want it for [AWK](https://en.wikipedia.org/wiki/AWK)?
 
 It may sound surprising, but I write it in AWK. I won't lie, it started more out of curiosity than out of real need. To me limits encourage creativity. Few people know nowadays that AWK is a full-fledged programming language, though really minimalistic. 
 
-So the Makesure started more like an experiment to check how far it can go. It appears, pretty far. I think, this is not an exception, but rather a consistent pattern, due to true genius of [A., W., K.](https://archive.org/download/pdfy-MgN0H1joIoDVoIC7/The_AWK_Programming_Language.pdf):
+So the Makesure started more like an experiment to check how far it can go. It appears, pretty far. I think, this is not an exception, but rather a consistent pattern, due to true genius of [A., W., K., the authors of AWK](https://archive.org/download/pdfy-MgN0H1joIoDVoIC7/The_AWK_Programming_Language.pdf):
 
 > [I wrote a compiler in awk!](https://news.ycombinator.com/item?id=13452043)
 >
@@ -55,9 +55,8 @@ Essentially, to collect code coverage statistics the source code instrumentation
 
 ### How code coverage for AWK differs from mainstream languages
 
-For testing `makesure` I'm using the [tush](https://github.com/adolfopa/tush) tool.
-~~Accidentally, it's written in AWK, but it's not the point.~~ 
-The tool provides really nice and simple way to test a CLI-tool as a black box.  
+For testing `makesure` I'm using the [tush](https://github.com/adolfopa/tush) tool. It provides really nice and simple way to test a CLI-tool (as a black box).  
+
 The tests in `tush` look like
 ```
 $ command --that --should --execute correctly
@@ -67,23 +66,22 @@ $ command --that --will --cause error
 @ expected stderr output
 ? expected-exit-code
 ```
+(in my case `command` = `makesure`)
 
 When running such test, `tush` runs all lines starting with `$` and simply compares the actual output with the expected one (`|` for stdout, `@` for stderr) using a usual `diff`. If there is a difference, the test fails and the `diff` output is displayed to the user.
 
-In essence, such tests are End-to-end tests that are on the top of well-known testing pyramid. This is very good, since this style of testing is equivalent to how real user uses the tool. 
+In essence, such tests are end-to-end tests that are on the top of well-known [testing pyramid](https://automationpanda.com/2018/08/01/the-testing-pyramid/). This is very good, since this style of testing is equivalent to how _real_ user uses the tool. Thus, much higher chances catching _real_ bugs. 
 
 Using this approach I created the comprehensive test suite for the tool with a typical test file [looking like this](https://github.com/xonixx/makesure/blob/main/tests/10_define.tush).
 
- - ~~need for `-coverappend`~~
-
-The main difference of testing in "usual" languages (like Go, Python, Java) from this approach is that 
-
-The usual approach to testing (like in Go, Python or Java) is you create a set of tests (usually, in multiple source file), then you use some "test runner" to run all them at once. Here is a subtle but principal difference from the approach described above.
+The usual approach to testing (like in Go, Python or Java) is you create a set of tests (usually, in multiple source file), then you use some "test runner" to run all them at once. Here lays a subtle but principal difference from the approach described above.
 So in case of test runner you run it once for all tests and so it can form the coverage profile file at completion for all tests.
 
 In case with `tush` the program-under-test (`makesure`) and thus the `awk` underneath is called lots of times (with different parameters). So it means we want to have a way to assemble the final coverage profile incrementally. 
 
 This poses additional challenge at implementing coverage for AWK. So we need that separate runs of AWK program be able to append to a single coverage profile file. This implies that not only the internal format of this file needs to be "appendable", but also requires that the reporting facility that consumes the file "understands" this "appendability".
+
+~~Luckily, the approach we took already had - describe in chosen approach section + `-coverappend`~~
 
 
 ### How I thought to approach the issue
