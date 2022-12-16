@@ -21,7 +21,7 @@ But why may we want it for [AWK](https://en.wikipedia.org/wiki/AWK)?
 
 It may sound surprising, but I write it in AWK. I won't lie, it started more out of curiosity than out of real need. To me limits encourage creativity. Few people know nowadays that AWK is a full-fledged programming language, though really minimalistic. 
 
-So the Makesure started more like an experiment to check how far it can go. It appears, pretty far. I think, this is not an exception, but rather a consistent pattern, due to true genius of [A., W., K., the authors of AWK](https://archive.org/download/pdfy-MgN0H1joIoDVoIC7/The_AWK_Programming_Language.pdf):
+So the Makesure started more like an experiment to check how far it can go. It appears, pretty far. I think, this is not an exception, but rather a consistent pattern, due to true genius of the AWK authors.
 
 > [I wrote a compiler in awk!](https://news.ycombinator.com/item?id=13452043)
 >
@@ -96,7 +96,7 @@ The other direction of my thought was defined by the classical book [The AWK Pro
 
  ~~- The AWK Programming Language by A. W. K. pp. 167-169 - 7.2. Profiling~~ 
 
-On pages 167-169 of this book there is a chapter "7.2. Profiling". It describes very simple approach how one can implement the profiling of a program by just two AWK scripts `makeprof` and `printprof` of around 5 lines each (sic!). 
+On pages 167-169 of this book there is a chapter "7.2. Profiling". It describes a very simple approach how one can implement the profiling of a program by just two AWK scripts `makeprof` and `printprof` of around 5 lines each (sic!). 
 
 `makeprof` does (admittedly naive) transformation of input source by inserting `_LBcnt[i]++;` after each left brace `{`. Then it also adds the `END` clause that outputs the collected statement counts in `_LBcnt` to a file. 
 
@@ -106,13 +106,19 @@ I was completely fascinated by the simplicity and clarity of this approach!
 
 Despite it was far from perfect and practical, I really considered using some improved version of this approach. ~~I hoped it would be possible to make this completely in AWK.~~ However, it was clear that to make it more precise and robust, the AST-level transformation was needed, not just naive source code modification.   
     
-### Implementation
+#### Chosen implementation approach
+                          
+Working closely with AWK for my project one day I came across the GoAWK. Out of curiosity I tried running the Makesure with it. This revealed some bugs in GoAWK, that I've reported, and they were fixed promptly by Ben Hoyt, the creator. So eventually GoAWK passed the test suite of Makesure.
 
-#### Chosen approach
-    
-Reuse Golang machinery.
+At that time I myself started getting interested in learning Golang. So I was happy to contribute myself some other minor bug I've encountered. Overall I really liked the project and especially the author behind it. I can't help but recommend [his technical blog](https://benhoyt.com/writings/) - very well written and interesting.
 
-- https://go.dev/blog/cover
+So I thought that whatever implementation approach I choose, I would like to use GoAWK as a base. Since GoAWK was written in Go, I decided to take a look on coverage story of Golang itself. This was when I came across [this article on Go's cover](https://go.dev/blog/cover). And it was instant hit! 
+
+The functionality was not as advanced as with Istanbul, but still enough. 
+The implementation seemed to be relatively simple. 
+But most importantly, their coverage profile file format appears to be designed for appendability in mind! (Though, to my knowledge this feature is not directly used by Golang itself). 
+
+So decided! We add code coverage functionality to GoAWK using the Golang's coverage profile file format. And then reusing the Golang machinery (`go tool cover`) to render final report.
 
 #### Failed (hacky) attempt
 
