@@ -90,9 +90,21 @@ Couple years ago I came across the article [Code Coverage for Solidity](https://
 
 The author based his implementation on [Instabul](https://istanbul.js.org/) coverage tool, initially targeted on JavaScript. But the author managed to generate the coverage report for the other language (Solidity) in the format of the tool. Thus, he could reuse the reporting facility of Istanbul for free.
 
-My plan was to use the similar approach. 
+My plan was to use the similar approach. But my research have shown that their [coverage profile file format](https://github.com/gotwarlost/istanbul/blob/master/coverage.json.md) was not append-friendly. 
+      
+The other direction of my thought was defined by the classical book [The AWK Programming Language](https://archive.org/download/pdfy-MgN0H1joIoDVoIC7/The_AWK_Programming_Language.pdf) by Alfred V. Aho, Brian W. Kernighan, Peter J. Weinberger (the A., W., K. of AWK). By the way it's absolute pleasure to read and, amazingly, totally relevant, despite been published in 1988. ~~It's because the AWK language almost didn't change since then.~~
 
- - The AWK Programming Language by A. W. K. pp. 167-169 - 7.2. Profiling 
+ ~~- The AWK Programming Language by A. W. K. pp. 167-169 - 7.2. Profiling~~ 
+
+On pages 167-169 of this book there is a chapter "7.2. Profiling". It describes very simple approach how one can implement the profiling of a program by just two AWK scripts `makeprof` and `printprof` of around 5 lines each (sic!). 
+
+`makeprof` does (admittedly naive) transformation of input source by inserting `_LBcnt[i]++;` after each left brace `{`. Then it also adds the `END` clause that outputs the collected statement counts in `_LBcnt` to a file. 
+
+`printprof` attaches the statement counts from this file to the original program.
+
+I was completely fascinated by the simplicity and clarity of this approach! 
+
+Despite it was far from perfect and practical, I really considered using some improved version of this approach. ~~I hoped it would be possible to make this completely in AWK.~~ However, it was clear that to make it more precise and robust, the AST-level transformation was needed, not just naive source code modification.   
     
 ### Implementation
 
