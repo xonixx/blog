@@ -21,7 +21,7 @@ But why may we want it for [AWK](https://en.wikipedia.org/wiki/AWK)?
 
 It may sound surprising, but I write it in AWK. I won't lie, it started more out of curiosity than out of real need. To me limits encourage creativity. Few people know nowadays that AWK is a full-fledged programming language, though really minimalistic. 
 
-So the Makesure started more like an experiment to check how far it can go. It appears, pretty far. I think, this is not an exception, but rather a consistent pattern, due to true genius of the AWK authors.
+So the Makesure started more like an experiment to check how far it can go. It appears, pretty far. I think, this is not an exception, but rather a consistent pattern, due to the true genius of the AWK authors.
 
 > [I wrote a compiler in awk!](https://news.ycombinator.com/item?id=13452043)
 >
@@ -77,7 +77,7 @@ Using this approach I created the comprehensive test suite for the tool with a t
 The usual approach to testing (like in Go, Python or Java) is you create a set of tests (usually, in multiple source files), then you use some "test runner" to run all them at once. Here lays a subtle but principal difference from the approach described above.
 So in case of test runner you run it once for all tests and so it can form the coverage profile file at completion for all tests.
 
-In case with `tush` the program-under-test (`makesure`) and thus the `awk` underneath is called lots of times (with different parameters). So it means we want to have a way to assemble the final coverage profile file incrementally. 
+In case with `tush` the program-under-test (`makesure`, and thus the `awk` underneath) is called lots of times (with different arguments). So it means we want to have a way to assemble the final coverage profile file incrementally. 
 
 This poses additional implementation challenge. So we need that separate runs of AWK program be able to append to a single coverage profile file. This implies that not only the internal format of this file needs to be "appendable", but also requires that the reporting facility that consumes the file "understands" this "appendability".
 
@@ -88,7 +88,7 @@ This poses additional implementation challenge. So we need that separate runs of
          
 Couple years ago I came across the article [Code Coverage for Solidity](https://blog.colony.io/code-coverage-for-solidity-eecfa88668c2/)~~, that explains how the author added code coverage support to Solidity programming language~~. The article was pretty insightful for me, as it gave enough of technical explanation and described typical challenges when implementing code coverage for particular programming language.  
 
-The author based his implementation on [Instabul](https://istanbul.js.org/) coverage tool, initially targeted on JavaScript. But the author managed to generate the coverage report for the other language (Solidity) in the format of the tool. Thus, he could reuse the reporting facility of Istanbul for free.
+The author based his implementation on [Instabul](https://istanbul.js.org/) coverage tool, initially targeted on JavaScript. But the author managed to generate the coverage profile for the other language (Solidity) in the format of the tool. Thus, he could reuse the reporting facility of Istanbul for free.
 
 My plan was to use the similar approach. But my research have shown that their [coverage profile file format](https://github.com/gotwarlost/istanbul/blob/master/coverage.json.md) was not append-friendly. 
       
@@ -116,7 +116,7 @@ So I thought that whatever implementation approach I choose, I would like to use
 
 The functionality was not as advanced as with Istanbul, but still enough. 
 The implementation seemed to be relatively simple. 
-But most importantly, their coverage profile file format appears to be designed for appendability in mind! (Though, to my knowledge this feature is not directly used by Golang itself). 
+But most importantly, their coverage profile file format appears to be designed with appendability in mind! (Though, to my knowledge this feature is not directly used by Golang itself). 
 
 So decided! We add code coverage functionality to GoAWK using the Golang's coverage profile file format. And then reusing the Golang machinery (`go tool cover`) to render final report.
 
