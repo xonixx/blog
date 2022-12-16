@@ -85,8 +85,13 @@ This poses additional implementation challenge. So we need that separate runs of
 
 
 ### How I thought to approach the issue
-                       
- - [Code Coverage for Solidity](https://blog.colony.io/code-coverage-for-solidity-eecfa88668c2/)
+         
+Couple years ago I came across the article [Code Coverage for Solidity](https://blog.colony.io/code-coverage-for-solidity-eecfa88668c2/)~~, that explains how the author added code coverage support to Solidity programming language~~. The article was pretty insightful for me, as it gave enough of technical explanation and described typical challenges when implementing code coverage for particular programming language.  
+
+The author based his implementation on [Instabul](https://istanbul.js.org/) coverage tool, initially targeted on JavaScript. But the author managed to generate the coverage report for the other language (Solidity) in the format of the tool. Thus, he could reuse the reporting facility of Istanbul for free.
+
+My plan was to use the similar approach. 
+
  - The AWK Programming Language by A. W. K. pp. 167-169 - 7.2. Profiling 
     
 ### Implementation
