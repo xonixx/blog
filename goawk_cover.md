@@ -112,15 +112,25 @@ Working closely with AWK for my project one day I came across the GoAWK. Out of 
 
 At that time I myself started getting interested in learning Golang. So I was happy to contribute myself some other minor bug I've encountered. Overall I really liked the project and especially the author behind it. I can't help but recommend [his technical blog](https://benhoyt.com/writings/) - very well written and interesting.
 
-So I thought that whatever implementation approach I choose, I would like to use GoAWK as a base. Since GoAWK was written in Go, I decided to take a look on coverage story of Golang itself. This was when I came across [this article on Go's cover](https://go.dev/blog/cover). And it was instant hit! 
+So I thought that whatever implementation approach I choose, I would like to use GoAWK as a base. Since GoAWK was written in Go, I decided to take a look on coverage story of Golang itself. This was when I came across [this article on Go's cover](https://go.dev/blog/cover). And it was an instant hit! 
 
-The functionality was not as advanced as with Istanbul, but still enough. 
-The implementation seemed to be relatively simple. 
-But most importantly, their coverage profile file format appears to be designed with appendability in mind! (Though, to my knowledge this feature is not directly used by Golang itself). 
+The functionality was not as advanced as with Istanbul, but still enough. The implementation seemed to be relatively simple. But most importantly, their coverage profile file format appears to be designed with appendability in mind! (Though, to my knowledge this feature is not directly used by Golang itself). 
 
 So decided! We add code coverage functionality to GoAWK using the Golang's coverage profile file format. And then reusing the Golang machinery (`go tool cover`) to render final report.
 
 #### Failed (hacky) attempt
+
+Firstly it would be really beneficial for the reader in order to better understand the following to read the [Ben's own writing on GoAWK](https://benhoyt.com/writings/goawk/).
+
+So GoAWK uses pretty standard programming languages implementation design, and therefore execution strategy.
+
+- Firstly the input AWK source (as a string) is processed by **Lexer**, outputting a **list of tokens**. 
+- Then, the **list of tokens** serves as an input for **Parser**, and now the output is an **AST** (abstract syntax tree).
+- Then the **AST** [passes through](https://benhoyt.com/writings/goawk-compiler-vm/) the **Bytecode Compiler** producing **list of opcodes** (instructions), the GoAWK assembly code.
+- Finally **list of opcodes** serves as input to **Interpreter**, which has inside a **Virtual Machine** that just runs the opcodes instruction by instruction. 
+
+Now I needed to understand how to fit in this scheme the code coverage functionality.
+
 
 #### Refactorings
 
@@ -138,3 +148,4 @@ Revealed [uncovered places](https://github.com/xonixx/makesure/issues/111) and e
 
 - Please also take a look at [GoAWK code coverage article by Ben Hoyt](https://benhoyt.com/writings/goawk-coverage/).
 - https://github.com/benhoyt/goawk/blob/master/docs/cover.md
+- https://benhoyt.com/writings/goawk/
