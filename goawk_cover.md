@@ -197,8 +197,24 @@ But GoAWK in step 1. just joins all source files in single string and uses it as
 
 This means, that by the time we've got the AST after step 2. there is absolutely no way to tell which AST node came from what file. Thus, we aren't able to fill the `path` field for our `trackedBlock` during instrumentation.
 
+So to pass the required `path` information to AST it needs to wire it through both Lexer and Parser, I thought. For this [I introduced a "fake" token](https://github.com/benhoyt/goawk/compare/070521a687628ad88f731b734077f15e6ec16f92...c067bfc8212836ad9cd6cb1783bfdfb6d61a0b7b) that I inserted at start of each file. Thus, when sources were joined this token represented files boundaries. It means, that at parse time I was able to track the filenames and local positions in each file.  
+
 
 #### Refactorings
+                           
+Although the approach worked well in practice, it was clear that it was ugly, and that it had zero chances to be merged as is. Ben came up with a [list with his code review remarks](https://github.com/benhoyt/goawk/issues/144#issuecomment-1223087337).
+There was no other way than to undertake a couple of serious refactorings before we can even discuss the merging of my effort. 
+
+Frankly, I was not upset at all, but rather excited! Firstly, I've got a chance to do even more useful work for the project I liked. And I was still glad to keep sharpening my Go fu further.
+
+The biggest thing to start with was decoupling Parse and Resolve steps. This was a bit scary thing to touch. Even Ben described this part of code as 
+
+> In fact, the resolver was one of the harder pieces of code I’ve written for a while. It’s the one piece of the GoAWK source I’m not particularly happy with. It works, but it’s messy, and I’m still not sure I’ve covered all the edge cases.
+                            
+But looked like I was getting overall how it worked and how can I do the job. Reading Ben's tech writings was of big help. 
+
+I needed the way to traverse (and update) the AST for resolving step after the parsing. 
+For this I [used the Visitor pattern](https://github.com/benhoyt/goawk/blob/master/internal/ast/walk.go) approach, very similar to one, [used in Golang](https://github.com/golang/go/blob/690ac4071fa3e07113bf371c9e74394ab54d6749/src/go/ast/walk.go).
 
 The approach to big changes. 
 
