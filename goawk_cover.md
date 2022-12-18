@@ -160,7 +160,7 @@ BEGIN {
     }
 }
 ```
-It was obvious that this tracking code insertion should take place on the AST level. So I imagined we'll need to add the additional step between 2. and 3. It will take AST as input, pass it through some **CoverageAnnotator** (yet to be added) and produce the transformed AST.
+It was obvious that this tracking code insertion should take place on the AST level. So I imagined we'll need to add the additional step between 2 and 3. It will take AST as input, pass it through some **CoverageAnnotator** (yet to be added) and produce the transformed AST.
 
 Not so simple in practice. And the main problem here was the tight connection of **Parser** and **Resolver**. In fact, both of them worked on same pass, so it was impossible to run them separately. 
 
@@ -168,7 +168,7 @@ Let me explain, why this is important. If I just change the AST by adding the re
 
 So I thought, why not just render AST back to AWK source and then simply start the whole process from step 1. Luckily, GoAWK already had `String()` implementation for all AST nodes, so it could render AST back to AWK. Unluckily, this AWK source [was not guaranteed to be correct](https://github.com/benhoyt/goawk/issues/142), because its only purpose was to output the parsed AST tree for debug purposes (flag `-d`).
 
-This is when I added the first dirty hack - I patched the instrumented AST (more precise, the inserted pieces) as if this was done by Resolver itself. 
+This is when I added the first dirty hack - I patched the instrumented AST (more precisely, the inserted pieces) as if this was done by Resolver itself. 
 
 The second hack I used was even nastier. You see, when we insert cover point like
 
@@ -180,14 +180,14 @@ we also internally store the information that describes it, like filename and so
 So internally we have (Go pseudocode):
 ```go
 trackedBlocks[2] = trackedBlock { 
-   path:     "a.awk", 
-   start:    "6:8", 
-   end:      "6:25", 
-   numStmts: 1,
+   path:     "/path/to/script.awk", 
+   start:    "2:3", 
+   end:      "35:13", 
+   numStmts: 34,
 }
 ```
 
-Storing this data is required for building the coverage profile file, that for looks like:
+Storing this data is required for building the coverage profile file (in format used by Go cover):
 ```
 ...
 /path/to/script.awk:2.3,35.13 34 1
@@ -196,9 +196,7 @@ Storing this data is required for building the coverage profile file, that for l
 /path/to/script.awk:42.27,42.42 1 0
 ...
 ```
-(This is the format compatible with Go cover).
-
-Explanation: each line describes code coverage for some block of code and has format
+Explanation: each line describes collected coverage for some block of code and has format
 ```
 <source_file_path>:<column_from>.<line_from>,<column_to>.<line_to> <num_stmts> <exec_count>
 ```
@@ -210,9 +208,9 @@ Now, remember, you can run AWK with multiple files like so
 awk -f file1.awk -f file2.awk -f file3.awk
 ```
 
-But GoAWK in step 1. just joins all source files into single string and uses it as an input to Lexer. 
+But GoAWK in step 1 just joins all source files into single string and uses it as an input to Lexer. 
 
-This means, that by the time we've got the AST after step 2. there is absolutely no way to tell which AST node came from what input file. Thus, we aren't able to fill the `path` field for our `trackedBlock` during instrumentation.
+This means, that by the time we've got the AST after step 2 there is absolutely no way to tell which AST node came from what input file. Thus, we aren't able to fill the `path` field for our `trackedBlock` during instrumentation.
 
 So to pass the required `path` information to AST it needs to wire it through both Lexer and Parser, I thought. For this [I introduced a "fake" token](https://github.com/benhoyt/goawk/compare/070521a687628ad88f731b734077f15e6ec16f92...c067bfc8212836ad9cd6cb1783bfdfb6d61a0b7b) that I inserted at start of each file. Thus, when sources were joined this token represented files boundaries. It means, that at parse time I was able to track the filenames and local positions in each file.  
 
