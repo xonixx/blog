@@ -122,7 +122,7 @@ So decided! We add code coverage functionality to GoAWK using the Golang's cover
 
 _Firstly it would be really beneficial for the reader in order to better understand the following reading to read first the [Ben's own writing on GoAWK](https://benhoyt.com/writings/goawk/)._
 
-So GoAWK used pretty standard programming languages implementation design, and therefore execution strategy:
+GoAWK used pretty standard programming languages implementation design, and therefore execution strategy:
 
 1. Firstly the input AWK source (as a string) is processed by [**Lexer**](https://benhoyt.com/writings/goawk/#lexer), outputting a list of tokens. 
 2. Then the list of tokens serves as an input for [**Parser**](https://benhoyt.com/writings/goawk/#parser), and now the output is an AST (abstract syntax tree).
@@ -187,22 +187,39 @@ trackedBlocks[2] = trackedBlock {
 }
 ```
 
+Storing this data is required for building the coverage profile file, that for looks like:
+```
+...
+/path/to/script.awk:2.3,35.13 34 1
+/path/to/script.awk:41.39,41.51 1 0
+/path/to/script.awk:40.5,41.39 2 0
+/path/to/script.awk:42.27,42.42 1 0
+...
+```
+(This is the format compatible with Go cover).
+
+Explanation: each line describes code coverage for some block of code and has format
+```
+<source_file_path>:<column_from>.<line_from>,<column_to>.<line_to> <num_stmts> <exec_count>
+```
+
+
 Now, remember, you can run AWK with multiple files like so
 
 ```
 awk -f file1.awk -f file2.awk -f file3.awk
 ```
 
-But GoAWK in step 1. just joins all source files in single string and uses it as an input to Lexer. 
+But GoAWK in step 1. just joins all source files into single string and uses it as an input to Lexer. 
 
-This means, that by the time we've got the AST after step 2. there is absolutely no way to tell which AST node came from what file. Thus, we aren't able to fill the `path` field for our `trackedBlock` during instrumentation.
+This means, that by the time we've got the AST after step 2. there is absolutely no way to tell which AST node came from what input file. Thus, we aren't able to fill the `path` field for our `trackedBlock` during instrumentation.
 
 So to pass the required `path` information to AST it needs to wire it through both Lexer and Parser, I thought. For this [I introduced a "fake" token](https://github.com/benhoyt/goawk/compare/070521a687628ad88f731b734077f15e6ec16f92...c067bfc8212836ad9cd6cb1783bfdfb6d61a0b7b) that I inserted at start of each file. Thus, when sources were joined this token represented files boundaries. It means, that at parse time I was able to track the filenames and local positions in each file.  
 
 
 #### Refactorings
                            
-Although the approach worked well in practice, it was clear that it was ugly, and that it had zero chances to be merged as is. Ben came up with a [list with his code review remarks](https://github.com/benhoyt/goawk/issues/144#issuecomment-1223087337).
+Although the approach worked well in practice, it was clear that it was ugly, and that it had zero chances to be merged as is. Ben came up with a [list of code review remarks](https://github.com/benhoyt/goawk/issues/144#issuecomment-1223087337).
 There was no other way than to undertake a couple of serious refactorings before we can even discuss the merging of my effort. 
 
 Frankly, I was not upset at all, but rather excited! Firstly, I've got a chance to do even more useful work for the project I liked. And I was still glad to keep sharpening my Go fu further.
@@ -214,7 +231,9 @@ The biggest thing to start with was decoupling Parse and Resolve steps. This was
 But looked like I was getting overall how it worked and how can I do the job. Reading Ben's tech writings was of big help. 
 
 I needed the way to traverse (and update) the AST for resolving step after the parsing. 
-For this I [used the Visitor pattern](https://github.com/benhoyt/goawk/blob/master/internal/ast/walk.go) approach, very similar to one, [used in Golang](https://github.com/golang/go/blob/690ac4071fa3e07113bf371c9e74394ab54d6749/src/go/ast/walk.go).
+For this [I used the Visitor pattern](https://github.com/benhoyt/goawk/blob/master/internal/ast/walk.go) approach, very similar to one, [used in Golang](https://github.com/golang/go/blob/690ac4071fa3e07113bf371c9e74394ab54d6749/src/go/ast/walk.go). Once the visitor functionality was in place, the AST traversal needed for resolving [was easy](https://github.com/benhoyt/goawk/blob/d7911647f3b08af099b50c9e991e72cfacdd1e2e/internal/resolver/resolve.go#L59).
+
+
 
 The approach to big changes. 
 
