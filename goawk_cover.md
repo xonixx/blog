@@ -239,7 +239,7 @@ Overall I highly recommend this approach to big contributions. You should not tr
 
 ### Results
 
-Revealed [uncovered places](https://github.com/xonixx/makesure/issues/111) and eventually found (and fixed) a bug.
+Running GoAWK coverage on Makesure revealed [uncovered places](https://github.com/xonixx/makesure/issues/111). This helped to find a bug (already fixed).
          
 ### What's lacking
 
@@ -258,6 +258,9 @@ It would be really nice to improve this for GoAWK coverage and maybe even for Go
 
 ### Links
 
-- Please also take a look at [GoAWK code coverage article by Ben Hoyt](https://benhoyt.com/writings/goawk-coverage/).
-- https://github.com/benhoyt/goawk/blob/master/docs/cover.md
-- https://benhoyt.com/writings/goawk/
+- [GoAWK code coverage article by Ben Hoyt](https://benhoyt.com/writings/goawk-coverage/)
+- [GoAWK coverage documentation](https://github.com/benhoyt/goawk/blob/master/docs/cover.md)
+- [GoAWK, an AWK interpreter written in Go](https://benhoyt.com/writings/goawk/)
+- [The Go Blog - The cover story by Rob Pike](https://go.dev/blog/cover)
+- [Code Coverage for Solidity](https://blog.colony.io/code-coverage-for-solidity-eecfa88668c2/)
+- [The AWK Programming Language](https://archive.org/download/pdfy-MgN0H1joIoDVoIC7/The_AWK_Programming_Language.pdf) - the book by AWK creators, must read
