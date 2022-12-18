@@ -231,11 +231,11 @@ But looked like I was getting overall how it worked and how can I do the job. Re
 I needed the way to traverse (and update) the AST for resolving step after the parsing. 
 For this [I used the Visitor pattern](https://github.com/benhoyt/goawk/blob/master/internal/ast/walk.go) approach, very similar to one, [used in Golang](https://github.com/golang/go/blob/690ac4071fa3e07113bf371c9e74394ab54d6749/src/go/ast/walk.go). Once the visitor functionality was in place, the AST traversal needed for resolving [was easy](https://github.com/benhoyt/goawk/blob/d7911647f3b08af099b50c9e991e72cfacdd1e2e/internal/resolver/resolve.go#L59).
 
+My [other refactoring](https://github.com/benhoyt/goawk/pull/153) served the purpose of resolving (global) positions in joined source back to (local) positions in input source files. This was needed to get rid of hack #2 mentioned above.    
+           
+When all needed refactorings were reviewed and merged to master I was able to submit my [final clean implementation](https://github.com/benhoyt/goawk/pull/154) on top.
 
-
-The approach to big changes. 
-
-- https://twitter.com/iamdevloper/status/397664295875805184?lang=en
+Overall I highly recommend this approach to big contributions. You should not try to fit all your changes into a single pull request. Each PR should be "highly cohesive", i.e. solve only single problem. This is much easier for the project owner to review and accept such PR. And this is also because each of such PRs will be valuable by its own, even if not all of them manage to reach the master branch. This is because, no doubt, [problem decomposition is the most important idea in all of computer science](https://www.youtube.com/watch?v=bmSAYlu0NcY&t=187s). 
 
 ### Results
 
