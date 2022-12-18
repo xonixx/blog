@@ -243,6 +243,19 @@ Revealed [uncovered places](https://github.com/xonixx/makesure/issues/111) and e
          
 ### What's lacking
 
+As I've mentioned, the Go's coverage approach is not very advanced. It implements _statement_ coverage rather that _branch_ coverage (the same applies to GoAWK coverage). For simplicity, [it doesn't cover some corner cases](https://go.dev/blog/cover#basic-blocks). Other coverage tools, like Istanbul can provide more detailed coverage, like coverage for [both of ternary cases](https://blog.colony.io/code-coverage-for-solidity-eecfa88668c2/#the-ternary-operator) or [invisible else branch](https://blog.colony.io/code-coverage-for-solidity-eecfa88668c2/#invisible-else-branches).
+To illustrate a point, let's imagine the code
+```awk
+if (codition) {
+  print "body"
+}
+print "after"
+```
+You can have it all green, but still something not covered. That is we may additionally want to check the case when (explicitly absent) else branch is covered. In other words we want to make sure both variants (`true`/`false`) for `condition` are covered.
+
+It would be really nice to improve this for GoAWK coverage and maybe even for Golang itself.
+  
+
 ### Links
 
 - Please also take a look at [GoAWK code coverage article by Ben Hoyt](https://benhoyt.com/writings/goawk-coverage/).
