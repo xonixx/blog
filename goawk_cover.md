@@ -125,14 +125,14 @@ _Firstly it would be really beneficial for the reader in order to better underst
 So GoAWK used pretty standard programming languages implementation design, and therefore execution strategy:
 
 1. Firstly the input AWK source (as a string) is processed by [**Lexer**](https://benhoyt.com/writings/goawk/#lexer), outputting a list of tokens. 
-2. Afterwards, the list of tokens serves as an input for [**Parser**](https://benhoyt.com/writings/goawk/#parser), and now the output is an AST (abstract syntax tree).
+2. Then the list of tokens serves as an input for [**Parser**](https://benhoyt.com/writings/goawk/#parser), and now the output is an AST (abstract syntax tree).
    - There is also a notion of [**Resolver**](https://benhoyt.com/writings/goawk/#resolver) that was initially a part of **Parser**. It analyzes the AST and annotates it with some additional data, like the information about inferred types. 
-3. Then the AST [passes through](https://benhoyt.com/writings/goawk-compiler-vm/) the **Bytecode Compiler** producing list of opcodes (bytecodes, instructions), the GoAWK assembly code.
+3. Afterwards, the AST [passes through](https://benhoyt.com/writings/goawk-compiler-vm/) the **Bytecode Compiler** producing list of opcodes (bytecodes, instructions), the GoAWK assembly code.
 4. Finally, the bytecode serves as input to **Interpreter**, which has inside a Virtual Machine that just runs the opcodes instruction by instruction. 
 
 Now I needed to understand how to fit the code coverage functionality into this scheme.
 
-So, as I explained earlier, we need to instrument the source code for coverage tracking.
+As I explained earlier, we need to instrument the source code for coverage tracking.
 It's much easier to explain on example:
 
 Given the source
@@ -146,7 +146,7 @@ BEGIN {
     }
 }
 ```
-the instrumented code will be
+the instrumented code will look like
 ```awk
 BEGIN {
     __COVER["3"] = 1     # track coverage
@@ -160,11 +160,42 @@ BEGIN {
     }
 }
 ```
-It was obvious that this tracking code insertion should take place on the AST level. So I imagined we'll need to add the additional step between 2. and 3. that will take AST as input, pass it through some **CoverageAnnotator** (yet to be added) and produce the transformed AST.
+It was obvious that this tracking code insertion should take place on the AST level. So I imagined we'll need to add the additional step between 2. and 3. It will take AST as input, pass it through some **CoverageAnnotator** (yet to be added) and produce the transformed AST.
 
 Not so simple in practice. And the main problem here was the tight connection of **Parser** and **Resolver**. In fact, both of them worked on same pass, so it was impossible to run them separately. 
 
-Let me explain, why this is important. 
+Let me explain, why this is important. If I just change the AST by adding the required AST nodes for the `__COVER["N"] = 1` statement, that nodes will lack some tiny (but important) pieces of information filled by the Resolver. So somehow I needed to run the updated AST through the resolution step once again. But this was technically impossible, because Resolver (being part of Parser) could only consume what parser consumes (that is list of tokens). 
+
+So I thought, why not just render AST back to AWK source and then simply start the whole process from step 1. Luckily, GoAWK already had `String()` implementation for all AST nodes, so it could render AST back to AWK. Unluckily, this AWK source [was not guaranteed to be correct](https://github.com/benhoyt/goawk/issues/142), because its only purpose was to output the parsed AST tree for debug purposes (flag `-d`).
+
+This is when I added the first dirty hack - I patched the instrumented AST (more precise, the inserted pieces) as if this was done by Resolver itself. 
+
+The second hack I used was even nastier. You see, when we insert cover point like
+
+```awk
+__COVER["2"] = 1
+```
+
+we also internally store the information that describes it, like filename and source interval being covered, etc. Basically this information is captured as instance of `trackedBlock` structure: [link](https://github.com/benhoyt/goawk/blob/master/internal/cover/cover.go#L43).
+So internally we have (Go pseudocode):
+```go
+trackedBlocks[2] = trackedBlock { 
+   path:     "a.awk", 
+   start:    "6:8", 
+   end:      "6:25", 
+   numStmts: 1,
+}
+```
+
+Now, remember, you can run AWK with multiple files like so
+
+```
+awk -f file1.awk -f file2.awk -f file3.awk
+```
+
+But GoAWK in step 1. just joins all source files in single string and uses it as an input to Lexer. 
+
+This means, that by the time we've got the AST after step 2. there is absolutely no way to tell which AST node came from what file. Thus, we aren't able to fill the `path` field for our `trackedBlock` during instrumentation.
 
 
 #### Refactorings
