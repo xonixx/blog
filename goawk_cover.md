@@ -120,16 +120,51 @@ So decided! We add code coverage functionality to GoAWK using the Golang's cover
 
 #### Failed (hacky) attempt
 
-Firstly it would be really beneficial for the reader in order to better understand the following to read the [Ben's own writing on GoAWK](https://benhoyt.com/writings/goawk/).
+_Firstly it would be really beneficial for the reader in order to better understand the following reading to read first the [Ben's own writing on GoAWK](https://benhoyt.com/writings/goawk/)._
 
-So GoAWK uses pretty standard programming languages implementation design, and therefore execution strategy.
+So GoAWK used pretty standard programming languages implementation design, and therefore execution strategy:
 
-- Firstly the input AWK source (as a string) is processed by **Lexer**, outputting a **list of tokens**. 
-- Then, the **list of tokens** serves as an input for **Parser**, and now the output is an **AST** (abstract syntax tree).
-- Then the **AST** [passes through](https://benhoyt.com/writings/goawk-compiler-vm/) the **Bytecode Compiler** producing **list of opcodes** (instructions), the GoAWK assembly code.
-- Finally **list of opcodes** serves as input to **Interpreter**, which has inside a **Virtual Machine** that just runs the opcodes instruction by instruction. 
+1. Firstly the input AWK source (as a string) is processed by [**Lexer**](https://benhoyt.com/writings/goawk/#lexer), outputting a list of tokens. 
+2. Afterwards, the list of tokens serves as an input for [**Parser**](https://benhoyt.com/writings/goawk/#parser), and now the output is an AST (abstract syntax tree).
+   - There is also a notion of [**Resolver**](https://benhoyt.com/writings/goawk/#resolver) that was initially a part of **Parser**. It analyzes the AST and annotates it with some additional data, like the information about inferred types. 
+3. Then the AST [passes through](https://benhoyt.com/writings/goawk-compiler-vm/) the **Bytecode Compiler** producing list of opcodes (bytecodes, instructions), the GoAWK assembly code.
+4. Finally, the bytecode serves as input to **Interpreter**, which has inside a Virtual Machine that just runs the opcodes instruction by instruction. 
 
-Now I needed to understand how to fit in this scheme the code coverage functionality.
+Now I needed to understand how to fit the code coverage functionality into this scheme.
+
+So, as I explained earlier, we need to instrument the source code for coverage tracking.
+It's much easier to explain on example:
+
+Given the source
+```awk
+BEGIN {
+    print "will always run"
+    if ((1 + 1) == 2) {
+        print "should run"
+    } else {
+        print "won't run"
+    }
+}
+```
+the instrumented code will be
+```awk
+BEGIN {
+    __COVER["3"] = 1     # track coverage
+    print "will always run"
+    if ((1 + 1) == 2) {
+        __COVER["1"] = 1 # track coverage
+        print "should run"
+    } else {
+        __COVER["2"] = 1 # track coverage
+        print "won't run"
+    }
+}
+```
+It was obvious that this tracking code insertion should take place on the AST level. So I imagined we'll need to add the additional step between 2. and 3. that will take AST as input, pass it through some **CoverageAnnotator** (yet to be added) and produce the transformed AST.
+
+Not so simple in practice. And the main problem here was the tight connection of **Parser** and **Resolver**. In fact, both of them worked on same pass, so it was impossible to run them separately. 
+
+Let me explain, why this is important. 
 
 
 #### Refactorings
