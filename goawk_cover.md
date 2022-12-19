@@ -101,7 +101,7 @@ Despite it was far from perfect and practical, I really considered using some im
     
 #### Chosen implementation approach
                           
-Working closely with AWK for my project one day I came across the GoAWK. Out of curiosity I tried running the Makesure with it. This revealed some bugs in GoAWK, that I've reported, and they were fixed promptly by Ben Hoyt, the creator. So eventually GoAWK passed the test suite of Makesure.
+Working closely with AWK for my project, one day I came across the GoAWK. Out of curiosity I tried running the Makesure with it. This revealed some bugs in GoAWK, that I've reported, and they were fixed promptly by Ben Hoyt, the creator. So eventually GoAWK passed the test suite of Makesure.
 
 At that time I myself started getting interested in learning Golang. So I was happy to contribute myself some other minor bug I've encountered. Overall I really liked the project and especially the author behind it. I can't help but recommend [his technical blog](https://benhoyt.com/writings/) - very well written and interesting.
 
@@ -120,8 +120,8 @@ GoAWK uses pretty standard programming languages implementation design, and ther
 1. Firstly the input AWK source (as a string) is processed by [**Lexer**](https://benhoyt.com/writings/goawk/#lexer), outputting a list of tokens. 
 2. Then the list of tokens serves as an input for [**Parser**](https://benhoyt.com/writings/goawk/#parser), and now the output is an AST (abstract syntax tree).
    - There is also a notion of [**Resolver**](https://benhoyt.com/writings/goawk/#resolver) that was initially a part of **Parser**. It analyzes the AST and annotates it with some additional data, like the information about inferred types. 
-3. Afterwards, the AST [passes through](https://benhoyt.com/writings/goawk-compiler-vm/) the **Bytecode Compiler** producing list of opcodes (bytecodes, instructions), the GoAWK assembly code.
-4. Finally, the bytecode serves as input to **Interpreter**, which has inside a Virtual Machine that just runs the opcodes instruction by instruction. 
+3. Afterwards, the AST [passes through](https://benhoyt.com/writings/goawk-compiler-vm/) the **Bytecode Compiler** producing list of opcodes (bytecodes, instructions) - the GoAWK assembly code.
+4. Finally, the bytecode serves as input to **Interpreter**, which has a Virtual Machine inside, that just runs the opcodes instruction by instruction. 
 
 Now I needed to understand how to fit the code coverage functionality into this scheme.
 
@@ -180,7 +180,7 @@ trackedBlocks[2] = trackedBlock {
 }
 ```
 
-Storing this data is required for building the coverage profile file (in format used by Go cover):
+Storing this data is needed for building the resulting coverage profile file (in the format used by Go cover):
 ```
 ...
 /path/to/script.awk:2.3,35.13 34 1
