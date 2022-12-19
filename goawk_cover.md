@@ -1,9 +1,9 @@
 
-# Coverage for GoAWK
+# Code Coverage for GoAWK
     
-### TLDR
+### TL;DR
 
-I contributed to [GoAWK project](https://github.com/benhoyt/goawk) by implementing the [code coverage](https://github.com/benhoyt/goawk/blob/master/docs/cover.md) functionality.
+I contributed to [GoAWK](https://github.com/benhoyt/goawk) project by implementing the [code coverage](https://github.com/benhoyt/goawk/blob/master/docs/cover.md) functionality.
 
 I'm grateful to [Ben Hoyt](https://benhoyt.com/) (the creator of GoAWK) for being really patient and helpful throughout my contribution process, providing thorough and insightful code reviews.
       
@@ -15,13 +15,11 @@ But why may we want it for [AWK](https://en.wikipedia.org/wiki/AWK)?
 
 ### How the idea emerged, motivators
 
-#### Makesure
-
 [Makesure](https://github.com/xonixx/makesure) is a task/command runner that I'm developing. It's sort of similar to the well-known `make` but without most of its idiosyncrasies (and with a couple of unique features!).
 
 It may sound surprising, but I write it in AWK. I won't lie, it started more out of curiosity than out of real need. To me limits encourage creativity. Few people know nowadays that AWK is a full-fledged programming language, though really minimalistic. 
 
-So the Makesure started more like an experiment to check how far it can go. It appears, pretty far. I think, this is not an exception, but rather a consistent pattern, due to the true genius of the AWK authors.
+So the Makesure started more like an experiment to check how far can it go. It appears, pretty far. I think, this is not an exception, but rather a consistent pattern, due to the true genius of the AWK authors.
 
 > [I wrote a compiler in awk!](https://news.ycombinator.com/item?id=13452043)
 >
@@ -43,7 +41,7 @@ else                          handleCodeLine($0)
 Essentially, using the limited tool for the job (AWK) provokes you to comply with [Worse is better](https://en.wikipedia.org/wiki/Worse_is_better) principle, that I'm big proponent of. You don't invent fancy syntax, but rather rely on one that actually can be parsed straight forward.
 
 Time passed and source code for the Makesure grew to a [pretty big awk file](https://github.com/xonixx/makesure/blob/main/makesure.awk). The tool had pretty extensive [test suite](https://github.com/xonixx/makesure/tree/main/tests), but I was not sure of how good the coverage is, whether all critical scenarios are tested or not.
-Thus, the need to test coverage [became apparent](https://github.com/xonixx/makesure/issues/103). The research revealed that no AWK implementation had code coverage facility. And so I decided to add one to some AWK implementation. The most suitable for such addition appeared to be the [GoAWK](https://github.com/benhoyt/goawk).
+Thus, the need to test coverage [became apparent](https://github.com/xonixx/makesure/issues/103). The research revealed that no AWK implementation had code coverage facility. And so I decided to add one to some AWK implementation. The most suitable for such addition appeared to be the GoAWK.
  
 Of course, some of my other motivators were practicing my Golang and AWK skills. 
                 
@@ -81,20 +79,15 @@ In case with `tush` the program-under-test (`makesure`, and thus the `awk` under
 
 This poses additional implementation challenge. So we need that separate runs of AWK program be able to append to a single coverage profile file. This implies that not only the internal format of this file needs to be "appendable", but also requires that the reporting facility that consumes the file "understands" this "appendability".
 
-~~Luckily, the approach we took already had - describe in chosen approach section + `-coverappend`~~
-
-
 ### How I thought to approach the issue
          
-Couple years ago I came across the article [Code Coverage for Solidity](https://blog.colony.io/code-coverage-for-solidity-eecfa88668c2/)~~, that explains how the author added code coverage support to Solidity programming language~~. The article was pretty insightful for me, as it gave enough of technical explanation and described typical challenges when implementing code coverage for particular programming language.  
+Couple years ago I came across the article [Code Coverage for Solidity](https://blog.colony.io/code-coverage-for-solidity-eecfa88668c2/). The article was pretty insightful for me, as it gave enough of technical explanation and described typical challenges when implementing code coverage for particular programming language.  
 
 The author based his implementation on [Instabul](https://istanbul.js.org/) coverage tool, initially targeted on JavaScript. But the author managed to generate the coverage profile for the other language (Solidity) in the format of the tool. Thus, he could reuse the reporting facility of Istanbul for free.
 
 My plan was to use the similar approach. But my research have shown that their [coverage profile file format](https://github.com/gotwarlost/istanbul/blob/master/coverage.json.md) was not append-friendly. 
       
-The other direction of my thought was defined by the classical book [The AWK Programming Language](https://archive.org/download/pdfy-MgN0H1joIoDVoIC7/The_AWK_Programming_Language.pdf) by Alfred V. Aho, Brian W. Kernighan, Peter J. Weinberger (the A., W., K. of AWK). By the way it's absolute pleasure to read and, amazingly, totally relevant, despite been published in 1988. ~~It's because the AWK language almost didn't change since then.~~
-
- ~~- The AWK Programming Language by A. W. K. pp. 167-169 - 7.2. Profiling~~ 
+The other direction of my thought was defined by the classical book [The AWK Programming Language](https://archive.org/download/pdfy-MgN0H1joIoDVoIC7/The_AWK_Programming_Language.pdf) by Alfred V. Aho, Brian W. Kernighan, Peter J. Weinberger (the A., W., K. of AWK. By the way it's absolute pleasure to read and, amazingly, totally relevant, despite been published in 1988).
 
 On pages 167-169 of this book there is a chapter "7.2. Profiling". It describes a very simple approach how one can implement the profiling of a program by just two AWK scripts `makeprof` and `printprof` of around 5 lines each (sic!). 
 
@@ -104,7 +97,7 @@ On pages 167-169 of this book there is a chapter "7.2. Profiling". It describes 
 
 I was completely fascinated by the simplicity and clarity of this approach! 
 
-Despite it was far from perfect and practical, I really considered using some improved version of this approach. ~~I hoped it would be possible to make this completely in AWK.~~ However, it was clear that to make it more precise and robust, the AST-level transformation was needed, not just naive source code modification.   
+Despite it was far from perfect and practical, I really considered using some improved version of this approach. However, it was clear that to make it more precise and robust, the AST-level transformation was needed, not just naive source code modification.   
     
 #### Chosen implementation approach
                           
@@ -122,7 +115,7 @@ So decided! We add code coverage functionality to GoAWK using the Golang's cover
 
 _Firstly it would be really beneficial for the reader in order to better understand the following reading to read first the [Ben's own writing on GoAWK](https://benhoyt.com/writings/goawk/)._
 
-GoAWK used pretty standard programming languages implementation design, and therefore execution strategy:
+GoAWK uses pretty standard programming languages implementation design, and therefore execution strategy:
 
 1. Firstly the input AWK source (as a string) is processed by [**Lexer**](https://benhoyt.com/writings/goawk/#lexer), outputting a list of tokens. 
 2. Then the list of tokens serves as an input for [**Parser**](https://benhoyt.com/writings/goawk/#parser), and now the output is an AST (abstract syntax tree).
@@ -164,7 +157,7 @@ It was obvious that this tracking code insertion should take place on the AST le
 
 Not so simple in practice. And the main problem here was the tight connection of **Parser** and **Resolver**. In fact, both of them worked on same pass, so it was impossible to run them separately. 
 
-Let me explain, why this is important. If I just change the AST by adding the required AST nodes for the `__COVER["N"] = 1` statement, that nodes will lack some tiny (but important) pieces of information filled by the Resolver. So somehow I needed to run the updated AST through the resolution step once again. But this was technically impossible, because Resolver (being part of Parser) could only consume what parser consumes (that is list of tokens). 
+Let me explain, why this is important. If I just change the AST by adding the required AST nodes for the `__COVER["N"] = 1` statement, those nodes will lack some tiny (but important) pieces of information filled by the Resolver. So somehow I needed to run the updated AST through the resolution step once again. But this was technically impossible, because Resolver (being part of Parser) could only consume what parser consumes (that is list of tokens). 
 
 So I thought, why not just render AST back to AWK source and then simply start the whole process from step 1. Luckily, GoAWK already had `String()` implementation for all AST nodes, so it could render AST back to AWK. Unluckily, this AWK source [was not guaranteed to be correct](https://github.com/benhoyt/goawk/issues/142), because its only purpose was to output the parsed AST tree for debug purposes (flag `-d`).
 
@@ -251,7 +244,7 @@ if (codition) {
 }
 print "after"
 ```
-You can have it all green, but still something not covered. That is we may additionally want to check the case when (explicitly absent) else branch is covered. In other words we want to make sure both variants (`true`/`false`) for `condition` are covered.
+You can have it all green, but still something not covered. The thing is, the (explicitly absent) else branch is not covered. In other words we want to make sure both variants (`true`/`false`) for `condition` are covered.
 
 It would be really nice to improve this for GoAWK coverage and maybe even for Golang itself.
   
